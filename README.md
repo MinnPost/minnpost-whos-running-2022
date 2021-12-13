@@ -25,7 +25,7 @@ If this user is new or it is being given new access, it can take a few minutes f
 
 ### Accessing an existing authentication
 
-If the Service Account user already exists in the Google Cloud Platform, you can access it at https://console.cloud.google.com/home/dashboard?project=[application-name]. In MinnPost's case, this URL is [https://console.cloud.google.com/home/dashboard?project=minnpost-mn-election-results](https://console.cloud.google.com/home/dashboard?project=minnpost-mn-election-results).
+If the Service Account user already exists in the Google Cloud Platform, you can access it at https://console.cloud.google.com/home/dashboard?project=[application-name]. In MinnPost's case, this URL is [https://console.cloud.google.com/home/dashboard?project=minnpost-whos-running-2022](https://console.cloud.google.com/home/dashboard?project=minnpost-whos-running-2022).
 
 If it hasn't been, you'll need your Google account added. An Administrator can do that at the correct dashboard URL by clicking "Add People to this Project."
 
