@@ -12,3 +12,4 @@ class Config(object):
     CACHE_REDIS_DB = os.environ.get("CACHE_REDIS_DB", 0)
     CACHE_REDIS_URL = os.environ.get("CACHE_REDIS_URL", "redis://127.0.0.1:6379/0")
     CACHE_DEFAULT_TIMEOUT = os.environ.get("CACHE_DEFAULT_TIMEOUT", 500)
+    SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "")
