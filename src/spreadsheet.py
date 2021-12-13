@@ -1,9 +1,38 @@
+import json
 from flask import current_app
 from src.extensions import cache
 
 from sheetfu import SpreadsheetApp
 
 @cache.memoize(300)
+def parser():
+    output = {}
+    data = []
+    spreadsheet_id = current_app.config["SPREADSHEET_ID"]
+    if spreadsheet_id is not None:
+        races = read_spreadsheet(spreadsheet_id, "Races")
+        candidates = read_spreadsheet(spreadsheet_id, "Candidates")
+
+        if races is not None:
+            for race in races:
+                if candidates is not None:
+                    race["candidates"] = {}
+                    for candidate in candidates:
+                        candidate_id = candidate["office-sought"].replace(" ", "").lower() + "-" + candidate["name"].replace(" ", "").lower()
+                        candidate["candidate_id"] = candidate_id
+                        if candidate["office-sought"] == race["office"]:
+                            if candidate["party"] in race["candidates"]:
+                                race["candidates"][candidate["party"]].append(candidate)
+                            else:
+                                race["candidates"][candidate["party"]] = [candidate]
+                data.append(race)
+        output = json.dumps(data)
+    else:
+        output = {} # something for empty data
+    return output
+
+
+@cache.memoize(60)
 def read_spreadsheet(spreadsheet_id, worksheet_name):
     """
     Connect to Google spreadsheet and return the data as a list of dicts with the header values as the keys.

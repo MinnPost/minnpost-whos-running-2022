@@ -19,4 +19,4 @@ def create_app(config_class=Config):
 
     return app
 
-from src import models
+from src import spreadsheet
