@@ -2,12 +2,11 @@ import json
 from flask import jsonify, Response, current_app
 from src.extensions import cache
 from src import spreadsheet
-from src.models import Race, Candidate 
 from src.candidate_tracker import bp
 #from src.candidate_tracker.errors import bad_request
 
 @bp.route("/", methods=['GET'])
-#@cache.cached(timeout=30, query_string=True)
+@cache.cached(timeout=30, query_string=True)
 def index():
     data = []
     spreadsheet_id = current_app.config["SPREADSHEET_ID"]
@@ -16,7 +15,6 @@ def index():
         candidates = spreadsheet.read_spreadsheet(spreadsheet_id, "Candidates")
 
         if races is not None:
-
             for race in races:
                 if candidates is not None:
                     race["candidates"] = {}
@@ -29,8 +27,6 @@ def index():
                             else:
                                 race["candidates"][candidate["party"]] = [candidate]
                 data.append(race)
-            
-
         output = json.dumps(data)
     else:
         output = {} # something for empty data

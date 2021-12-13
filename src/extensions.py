@@ -1,7 +1,7 @@
 from src.cache import cache
 from src.logger import ScraperLogger
 
-def register_extensions(app, worker=False):
+def register_extensions(app):
 
     cache.init_app(app)
 
