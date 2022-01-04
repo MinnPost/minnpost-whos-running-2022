@@ -37,6 +37,8 @@ Follow these steps to access the authentication credentials:
 1. Click the Actions menu for that account and choose the Manage keys option.
 1. Click Add Key, choose Create new key, and choose JSON as the Key type. Click the Create button and download the key for that Service Account. Only use this key for one environment.
 
+Once you have downloaded the JSON file with the credentials, you will be using the values from it in the `.env` file or in the project's Heroku settings. See the sections of this readme that cover authentication for Google Sheets. Once you've authenticated successfully, you don't have to keep the JSON file around, unless you'd like to have a backup.
+
 ## Local setup and development
 
 1. Install `git`
