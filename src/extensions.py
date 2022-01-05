@@ -1,8 +1,8 @@
 from src.cache import cache
-from src.logger import ScraperLogger
+from src.logger import TrackerLogger
 
 def register_extensions(app):
 
     cache.init_app(app)
 
-    app.log = ScraperLogger('scraper_results').logger
+    app.log = TrackerLogger('tracker_results').logger

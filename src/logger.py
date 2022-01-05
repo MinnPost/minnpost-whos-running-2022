@@ -1,11 +1,11 @@
 import os
 import logging
 
-class ScraperLogger:
+class TrackerLogger:
     """
     Class for logging.
     """
-    log_file = os.path.join(os.path.dirname(__file__), '../logs/scraping.log')
+    log_file = os.path.join(os.path.dirname(__file__), '../logs/tracker.log')
     formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
     def __init__(self, name):
