@@ -39,7 +39,39 @@ Follow these steps to access the authentication credentials:
 
 Once you have downloaded the JSON file with the credentials, you will be using the values from it in the `.env` file or in the project's Heroku settings. See the sections of this readme that cover authentication for Google Sheets. Once you've authenticated successfully, you don't have to keep the JSON file around, unless you'd like to have a backup.
 
-## Local setup and development
+## Redis setup
+
+Before running the application, you'll need to run a Redis server for caching data. One way to do this is with Homebrew.
+
+### Local setup
+
+1. Run `brew update` then `brew install redis`
+1. If you want Redis to start automatically on login, run `brew services start redis`. To stop it, run `brew services stop redis`. If you want to run Redis in a terminal shell instead, you can run `redis-server /usr/local/etc/redis.conf` instead of using brew service.
+1. Test if Redis is running with the command `redis-cli ping`. Redis should respond with "PONG."
+1. You shouldn't need a graphic interface for this project, but if you need one, [Medis](https://getmedis.com) is a free one on the Mac App Store.
+
+### Production setup
+
+To run Redis on Heroku, installing the free Heroku Redis add-on should be sufficient.
+
+### Configuration
+
+Use the following fields in your `.env` or in your Heroku settings.
+
+- `CACHE_TYPE = "redis"`
+- `CACHE_REDIS_HOST = "redis"`
+- `CACHE_REDIS_PORT = "6379"` (unless you are using a non-default port for Redis)
+- `CACHE_REDIS_DB = "0"` (unless you need a separate Redis database. Redis creates databases in numeric order, so you can use other numbers)
+- `CACHE_REDIS_URL = "redis://127.0.0.1:6379/0"` (make sure the `:6379` matches your port value, and that `/0` matches your Redis database number)
+- `CACHE_DEFAULT_TIMEOUT = "500"`
+
+## Application setup
+
+### Set the Google Spreadsheet to load
+
+Go to the Google spreadsheet you are using and copy the ID value from its URL. If the ID was `https://docs.google.com/spreadsheets/d/[spreadsheet-id]/edit#gid=809379382`, the ID would be `[spreadsheet-id]`. Use that value in your `.env` file and in the Heroku settings for the `SPREADSHEET_ID` field value.
+
+### Local setup and development
 
 1. Install `git`
 1. Get the code: `git clone https://github.com/MinnPost/minnpost-whos-running-2022.git`
@@ -49,7 +81,7 @@ Once you have downloaded the JSON file with the credentials, you will be using t
 1. Run `pipenv shell`
 1. Run `flask run --host=0.0.0.0`. This creates a basic endpoint server at http://0.0.0.0:5000.
 
-### Local authentication for Google Sheets
+#### Local authentication for Google Sheets
 
 Enter the configuration values from the JSON key downloaded above into the `.env` file's values for these fields:
 
@@ -64,13 +96,13 @@ Enter the configuration values from the JSON key downloaded above into the `.env
 - `SHEETFU_CONFIG_AUTH_PROVIDER_URL`
 - `SHEETFU_CONFIG_CLIENT_CERT_URL`
 
-## Production setup and deployment
+### Production setup and deployment
 
-### Code, Libraries and prerequisites
+#### Code, Libraries and prerequisites
 
 This application should be deployed to Heroku. If you are creating a new Heroku application, clone this repository with `git clone https://github.com/MinnPost/minnpost-whos-running-2022.git` and follow [Heroku's instructions](https://devcenter.heroku.com/articles/git#creating-a-heroku-remote) to create a Heroku remote.
 
-### Production authentication for Google Sheets
+#### Production authentication for Google Sheets
 
 In the project's Heroku settings, enter the configuration values from the production-only JSON key downloaded above into the values for these fields:
 
@@ -85,4 +117,4 @@ In the project's Heroku settings, enter the configuration values from the produc
 - `SHEETFU_CONFIG_AUTH_PROVIDER_URL`
 - `SHEETFU_CONFIG_CLIENT_CERT_URL`
 
-Run the scraper commands from the section below by following [Heroku's instructions](https://devcenter.heroku.com/articles/getting-started-with-python#start-a-console) for running Python commands. Generally, run commands on Heroku by adding `heroku run ` before the rest of the command listed below.
+
