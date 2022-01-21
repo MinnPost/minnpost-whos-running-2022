@@ -65,6 +65,19 @@ Use the following fields in your `.env` or in your Heroku settings.
 - `CACHE_REDIS_URL = "redis://127.0.0.1:6379/0"` (make sure the `:6379` matches your port value, and that `/0` matches your Redis database number)
 - `CACHE_DEFAULT_TIMEOUT = "500"`
 
+
+## Amazon S3 setup
+
+To push JSON data from this application to Amazon AWS, we use the `boto3` library.
+
+### Configuration
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+Fill in these values from the Amazon account.
+
+
 ## Application setup
 
 ### Set the Google Spreadsheet to load
@@ -117,4 +130,9 @@ In the project's Heroku settings, enter the configuration values from the produc
 - `SHEETFU_CONFIG_AUTH_PROVIDER_URL`
 - `SHEETFU_CONFIG_CLIENT_CERT_URL`
 
+## Application usage
 
+Currently, this application has two endpoints:
+
+- `/candidate-tracker/` is a cached version of the JSON data, parsed from the Google Sheet.
+- `/candidate-tracker/push-s3` pushes the current JSON data, parsed from the Google Sheet, to Amazon S3.
