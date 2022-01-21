@@ -1,6 +1,7 @@
 import json
 import datetime
 from flask import current_app
+from slugify import slugify
 from src.extensions import cache
 
 from sheetfu import SpreadsheetApp
@@ -30,7 +31,10 @@ def parser():
                     candidate["approved"] = True
                     # make an ID
                     candidate_id = candidate["office-sought"].replace(" ", "").lower() + "-" + candidate["name"].replace(" ", "").lower()
-                    candidate["candidate_id"] = candidate_id
+                    candidate["candidate-id"] = candidate_id
+                    # add the party id
+                    if candidate["party"] != None:
+                        candidate["party-id"] = slugify(candidate["party"], to_lower=True)
                     # add the race for this candidate
                     race_key = [k for k, race in enumerate(data["races"]) if race["office"] == candidate["office-sought"]][0]
                     candidate["race-key"] = race_key
