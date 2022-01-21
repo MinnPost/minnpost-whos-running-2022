@@ -21,6 +21,9 @@ def parser():
                 # format the date
                 if race["date-added"] != None:
                     race["date-added"] = convert_xls_datetime(race["date-added"])
+                # add the office id
+                if race["office"] != None:
+                    race["office-id"] = slugify(race["office"], to_lower=True)
                 data["races"].append(race)
 
         if candidates is not None:
@@ -35,6 +38,9 @@ def parser():
                     # add the party id
                     if candidate["party"] != None:
                         candidate["party-id"] = slugify(candidate["party"], to_lower=True)
+                    # add the office id
+                    if candidate["office-sought"] != None:
+                        candidate["office-id"] = slugify(candidate["office-sought"], to_lower=True)
                     # add the race for this candidate
                     race_key = [k for k, race in enumerate(data["races"]) if race["office"] == candidate["office-sought"]][0]
                     candidate["race-key"] = race_key
