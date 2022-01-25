@@ -40,7 +40,7 @@ def parser():
                         candidate["party-id"] = slugify(candidate["party"], to_lower=True)
                     # add the race for this candidate
                     race_key = [k for k, race in enumerate(data["races"]) if race["office"] == candidate["office-sought"]][0]
-                    candidate["race-key"] = race_key
+                    candidate["race-id"] = slugify(data["races"][race_key]["office"], to_lower=True)
                     # format the date fields
                     if candidate["date-added"] != None:
                         candidate["date-added"] = convert_xls_datetime(candidate["date-added"])
