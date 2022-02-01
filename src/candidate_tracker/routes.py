@@ -24,7 +24,7 @@ def push_to_s3():
   output = spreadsheet.parser()
   s3 = boto3.client('s3')
   s3.put_object(Bucket="data.minnpost", 
-                Key="projects/minnpost-whos-running-2022/candidate-tracker-sample-data.json", 
+                Key="projects/minnpost-whos-running-2022/candidate-tracker.json", 
                 Body=output,
                 ContentType='application/json; charset=UTF-8',
                 ACL="public-read")
