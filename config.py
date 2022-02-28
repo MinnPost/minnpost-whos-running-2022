@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -15,3 +16,6 @@ class Config(object):
     CACHE_REDIS_URL = os.environ.get("CACHE_REDIS_URL", "redis://127.0.0.1:6379/0")
     CACHE_DEFAULT_TIMEOUT = os.environ.get("CACHE_DEFAULT_TIMEOUT", 500)
     SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "")
+    PARSER_API_URL = os.environ.get("PARSER_API_URL", "")
+    OVERWRITE_API_URL = os.environ.get("OVERWRITE_API_URL", "")
+    WORKSHEET_NAMES = json.loads(os.environ.get("WORKSHEET_NAMES", '["Sheet1"]'))
