@@ -4,8 +4,6 @@ from flask import current_app
 from slugify import slugify
 from src.extensions import cache
 
-from sheetfu import SpreadsheetApp
-
 @cache.memoize(300)
 def parser():
     output = {}

@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 Flask = "==2.0.2"
 redis = "==4.1.1"
-sheetfu = "==1.5.4"
 flask-caching = "==1.10.1"
 awesome-slugify = "==1.6.5"
 boto3 = "==1.20.41"
