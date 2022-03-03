@@ -1,5 +1,6 @@
 import json
 import datetime
+from datetime import timedelta
 import requests
 from flask import current_app
 from slugify import slugify
@@ -11,6 +12,7 @@ def parser():
 
     spreadsheet_id = current_app.config["SPREADSHEET_ID"]
     worksheet_names = current_app.config["WORKSHEET_NAMES"]
+    cache_timeout = current_app.config["API_CACHE_TIMEOUT"]
     if spreadsheet_id is not None:
         url = current_app.config["PARSER_API_URL"]
         if url != "":
@@ -56,6 +58,7 @@ def parser():
                 if "generated" in result_json:
                     data["generated"] = result_json["generated"]
                 data["customized"] = datetime.datetime.now()
+                data["cache_timeout"] = data["customized"] + timedelta(seconds=int(cache_timeout))
                 output = json.dumps(data, default=str)
                 
                 overwrite_url = current_app.config["OVERWRITE_API_URL"]
