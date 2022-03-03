@@ -16,9 +16,8 @@ def parser():
     if spreadsheet_id is not None:
         url = current_app.config["PARSER_API_URL"]
         if url != "":
-            params = {"spreadsheet_id": spreadsheet_id, "worksheet_names": worksheet_names}
-            headers = {'Content-Type': 'application/json'}
-            result = requests.post(url, data=json.dumps(params), headers=headers)
+            worksheet_slug = '-'.join(worksheet_names)
+            result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}")
             result_json = result.json()
     
         if result_json is not None:
