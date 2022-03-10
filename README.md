@@ -11,21 +11,11 @@ For both local and remote environments, you'll need to have access to an instanc
 Use the following fields in your `.env` or in your Heroku settings.
 
 - `PARSER_API_URL = "http://0.0.0.0:5000/parser/"` (wherever the API is running, it uses a `parser` endpoint)
-- `OVERWRITE_API_URL = "http://0.0.0.0:5000/parser/custom-overwrite/"`  (wherever the API is running, it uses a `parser/custom-overwrite` endpoint)
+- `OVERWRITE_API_URL = "http://0.0.0.0:5000/parser/custom-overwrite/"` (wherever the API is running, it uses a `parser/custom-overwrite` endpoint)
 - `SPREADSHEET_ID = "your google sheet ID"`
-- `WORKSHEET_NAMES = '["Sheet1", "Sheet2"]'` (separate the names of the sheets with commas and surround each one with quotes)
+- `WORKSHEET_NAMES = '["Sheet1", "Sheet2"]'` (if you want to use multiple worksheets, or only one sheet that is not the first worksheet, separate the names of the sheets with commas and surround each one with quotes)
 - `API_CACHE_TIMEOUT = "500"` (this value is how many seconds the customized cache should last. `0` means it won't expire.)
-
-## Amazon S3 setup
-
-To push JSON data from this application to Amazon AWS, we use the `boto3` library.
-
-### Configuration
-
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-
-Fill in these values from the Amazon account.
+- `STORE_IN_S3` (provide a "true" or "false" value to set whether the API should send the JSON to S3. If you leave this blank, it will follow the API's settings.)
 
 ## Application setup
 
@@ -48,7 +38,6 @@ This application should be deployed to Heroku. If you are creating a new Heroku 
 
 ## Application usage
 
-Currently, this application has two endpoints:
+Currently, this application has one endpoint:
 
 - `/candidate-tracker/` is a cached version of the JSON data, parsed from the Google Sheet.
-- `/candidate-tracker/push-s3` pushes the current JSON data, parsed from the Google Sheet, to Amazon S3.

@@ -12,4 +12,4 @@ class Config(object):
     PARSER_API_URL = os.environ.get("PARSER_API_URL", "")
     OVERWRITE_API_URL = os.environ.get("OVERWRITE_API_URL", "")
     WORKSHEET_NAMES = json.loads(os.environ.get("WORKSHEET_NAMES", '["Sheet1"]'))
-    STORE_IN_S3 = os.environ.get("STORE_IN_S3", "false")
+    STORE_IN_S3 = os.environ.get("STORE_IN_S3", "")
