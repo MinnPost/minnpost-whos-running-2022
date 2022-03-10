@@ -18,7 +18,7 @@ def parser():
         url = current_app.config["PARSER_API_URL"]
         if url != "":
             worksheet_slug = '|'.join(worksheet_names)
-            result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3=false")
+            result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3={store_in_s3}")
             result_json = result.json()
     
         if result_json is not None:
