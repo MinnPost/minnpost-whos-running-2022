@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 Flask = "==2.0.2"
 awesome-slugify = "==1.6.5"
+requests = "==2.27.1"
 
 [requires]
 python_version = "3.10"
