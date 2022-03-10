@@ -1,5 +1,4 @@
 import json
-import boto3
 from flask import Response, current_app
 from src import spreadsheet
 from src.candidate_tracker import bp
@@ -14,14 +13,3 @@ def index():
     res.headers['Content-Type'] = ctype
     res.headers['Connection'] = 'keep-alive'
     return res
-
-@bp.route("/push-s3", methods=['GET'])
-def push_to_s3():
-  output = spreadsheet.parser()
-  s3 = boto3.client('s3')
-  s3.put_object(Bucket="data.minnpost", 
-                Key="projects/minnpost-whos-running-2022/candidate-tracker.json", 
-                Body=output,
-                ContentType='application/json; charset=UTF-8',
-                ACL="public-read")
-  return "Uploaded candidate-tracker.json to S3"
