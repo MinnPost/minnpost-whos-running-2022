@@ -13,11 +13,12 @@ def parser():
     spreadsheet_id = current_app.config["SPREADSHEET_ID"]
     worksheet_names = current_app.config["WORKSHEET_NAMES"]
     cache_timeout = int(current_app.config["API_CACHE_TIMEOUT"])
+    store_in_s3 = current_app.config["STORE_IN_S3"]
     if spreadsheet_id is not None:
         url = current_app.config["PARSER_API_URL"]
         if url != "":
-            worksheet_slug = '-'.join(worksheet_names)
-            result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}")
+            worksheet_slug = '|'.join(worksheet_names)
+            result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3=false")
             result_json = result.json()
     
         if result_json is not None:
@@ -64,7 +65,15 @@ def parser():
                 output = json.dumps(data, default=str)
                 
                 overwrite_url = current_app.config["OVERWRITE_API_URL"]
-                params = {"spreadsheet_id": spreadsheet_id, "worksheet_names": worksheet_names, "output": output}
+                params = {
+                    "spreadsheet_id": spreadsheet_id,
+                    "worksheet_names": worksheet_names,
+                    "output": output,
+                    "cache_timeout": cache_timeout,
+                    "bypass_cache": "true"
+                }
+                if store_in_s3 != "":
+                    params["external_use_s3"] = store_in_s3
 
                 headers = {'Content-Type': 'application/json'}
                 result = requests.post(overwrite_url, data=json.dumps(params), headers=headers)
