@@ -64,16 +64,16 @@ def parser():
                     data["cache_timeout"] = 0
                 output = json.dumps(data, default=str)
                 
+            if "customized" not in result_json or store_in_s3 == "true":
                 overwrite_url = current_app.config["OVERWRITE_API_URL"]
                 params = {
                     "spreadsheet_id": spreadsheet_id,
                     "worksheet_names": worksheet_names,
                     "output": output,
                     "cache_timeout": cache_timeout,
-                    "bypass_cache": "true"
+                    "bypass_cache": "true",
+                    "external_use_s3": "true"
                 }
-                if store_in_s3 != "":
-                    params["external_use_s3"] = store_in_s3
 
                 headers = {'Content-Type': 'application/json'}
                 result = requests.post(overwrite_url, data=json.dumps(params), headers=headers)
