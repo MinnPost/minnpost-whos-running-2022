@@ -72,7 +72,7 @@ def parser():
                     "output": output,
                     "cache_timeout": cache_timeout,
                     "bypass_cache": "true",
-                    "external_use_s3": "true"
+                    "external_use_s3": store_in_s3
                 }
 
                 headers = {'Content-Type': 'application/json'}
