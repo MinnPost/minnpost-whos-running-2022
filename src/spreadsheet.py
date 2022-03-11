@@ -2,7 +2,7 @@ import json
 import datetime
 from datetime import timedelta
 import requests
-from flask import current_app
+from flask import current_app, request
 from slugify import slugify
 
 def parser():
@@ -14,6 +14,7 @@ def parser():
     worksheet_names = current_app.config["WORKSHEET_NAMES"]
     cache_timeout = int(current_app.config["API_CACHE_TIMEOUT"])
     store_in_s3 = current_app.config["STORE_IN_S3"]
+    bypass_cache = request.args.get("bypass_cache", "false")
     if spreadsheet_id is not None:
         api_key = current_app.config["API_KEY"]
         authorize_url = current_app.config["AUTHORIZE_API_URL"]
@@ -29,7 +30,7 @@ def parser():
                 token = token_json["token"]
                 authorized_headers = {"Authorization": f"Bearer {token}"}
                 worksheet_slug = '|'.join(worksheet_names)
-                result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3={store_in_s3}", headers=authorized_headers)
+                result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3={store_in_s3}&bypass_cache={bypass_cache}", headers=authorized_headers)
                 result_json = result.json()
     
         if result_json is not None:
