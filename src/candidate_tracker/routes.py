@@ -10,6 +10,7 @@ def index():
     mime = 'application/json'
     ctype = 'application/json; charset=UTF-8'
     res = Response(response = output, status = 200, mimetype = mime)
-    res.headers['Content-Type'] = ctype
-    res.headers['Connection'] = 'keep-alive'
+    res.headers["Content-Type"] = ctype
+    res.headers["Connection"] = "keep-alive"
+    res.headers["Access-Control-Allow-Origin"] = "*"
     return res
