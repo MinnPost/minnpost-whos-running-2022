@@ -15,11 +15,22 @@ def parser():
     cache_timeout = int(current_app.config["API_CACHE_TIMEOUT"])
     store_in_s3 = current_app.config["STORE_IN_S3"]
     if spreadsheet_id is not None:
+        api_key = current_app.config["API_KEY"]
+        authorize_url = current_app.config["AUTHORIZE_API_URL"]
         url = current_app.config["PARSER_API_URL"]
-        if url != "":
-            worksheet_slug = '|'.join(worksheet_names)
-            result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3={store_in_s3}")
-            result_json = result.json()
+        if authorize_url != "" and api_key != "" and url != "":
+            token_params = {
+                "api_key": api_key
+            }
+            token_headers = {'Content-Type': 'application/json'}
+            token_result = requests.post(authorize_url, data=json.dumps(token_params), headers=token_headers)
+            token_json = token_result.json()
+            if token_json["token"]:
+                token = token_json["token"]
+                authorized_headers = {"Authorization": f"Bearer {token}"}
+                worksheet_slug = '|'.join(worksheet_names)
+                result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3={store_in_s3}", headers=authorized_headers)
+                result_json = result.json()
     
         if result_json is not None:
             if "customized" in result_json:
@@ -76,6 +87,8 @@ def parser():
                 }
 
                 headers = {'Content-Type': 'application/json'}
+                if authorized_headers:
+                    headers = headers | authorized_headers
                 result = requests.post(overwrite_url, data=json.dumps(params), headers=headers)
                 result_json = result.json()
                 if result_json is not None:

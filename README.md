@@ -2,13 +2,20 @@
 
 Tracking Minnesota candidates for the 2022 election
 
-## Google Sheets API setup
+## Google Sheets to JSON API setup
 
 For both local and remote environments, you'll need to have access to an instance of the [Google Sheets to JSON API](https://github.com/MinnPost/google-sheet-to-json-api) that itself has access to the Google Sheet(s) that you want to process. If you don't already have access to a working instance of that API, set it up and ensure it's working first.
 
+### Credentials
+
+To access the Google Sheets to JSON API you'll need to have two configuration values in your `.env` or in your Heroku settings.
+
+- `AUTHORIZE_API_URL = "http://0.0.0.0:5000/authorize/"` (wherever the API is running, it uses an `authorize` endpoint)
+- `API_KEY = ""` (a valid API key that is accepted by the installation of the API that you're accessing)
+
 ### Configuration
 
-Use the following fields in your `.env` or in your Heroku settings.
+Use the following additional fields in your `.env` or in your Heroku settings.
 
 - `PARSER_API_URL = "http://0.0.0.0:5000/parser/"` (wherever the API is running, it uses a `parser` endpoint)
 - `OVERWRITE_API_URL = "http://0.0.0.0:5000/parser/custom-overwrite/"` (wherever the API is running, it uses a `parser/custom-overwrite` endpoint)
