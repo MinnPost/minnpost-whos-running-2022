@@ -63,6 +63,10 @@ def parser():
                             # add the race for this candidate
                             race_key = [k for k, race in enumerate(data["races"]) if race["office"] == candidate["office-sought"]][0]
                             candidate["race-id"] = slugify(data["races"][race_key]["office"], to_lower=True)
+                            # format the boolean fields
+                            candidate["incumbent"] = convert_xls_boolean(candidate["incumbent"])
+                            candidate["endorsed"] = convert_xls_boolean(candidate["endorsed"])
+                            candidate["dropped-out"] = convert_xls_boolean(candidate["dropped-out"])
                             # add to the returnable data
                             data["candidates"].append(candidate)
                 
@@ -98,3 +102,16 @@ def parser():
     else:
         output = {} # something for empty data
     return output
+
+def convert_xls_boolean(string):
+    if string == None:
+        value = False
+    else:
+        string = string.lower()
+        if string == "yes" or string == "true":
+            value = True
+        elif string == "no" or string == "false":
+            value = False
+        else:
+            value = bool(string)
+    return value
