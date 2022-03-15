@@ -15,6 +15,8 @@ def parser():
     cache_timeout = int(current_app.config["API_CACHE_TIMEOUT"])
     store_in_s3 = current_app.config["STORE_IN_S3"]
     bypass_cache = request.args.get("bypass_cache", "false")
+    if store_in_s3 == "true":
+        bypass_cache = request.args.get("bypass_cache", "true")
     if spreadsheet_id is not None:
         api_key = current_app.config["API_KEY"]
         authorize_url = current_app.config["AUTHORIZE_API_URL"]
