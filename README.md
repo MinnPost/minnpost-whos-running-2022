@@ -44,7 +44,8 @@ Use the following additional fields in your `.env` or in your Heroku settings.
 
 Currently, this application has one endpoint:
 
-- `/candidate-tracker/` returns the current data parsed from the Google spreadsheet based on the configuration options above as they define caching, S3 storage, etc.
+- `/candidate-tracker/` returns a basic summary of what has happened. It will show the URL of an S3 push, or the cache timeout of cached data.
+- `/candidate-tracker/json/` returns the current data parsed from the Google spreadsheet based on the configuration options above as they define caching, S3 storage, etc.
 
 ### Data parameters
 
