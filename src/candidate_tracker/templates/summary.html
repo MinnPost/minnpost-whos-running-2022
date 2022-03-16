@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Update data</title>
+    </head>
+    <body>
+        <ul>
+            {% if output.cache_timeout %}
+                <li>
+                    {% if output.loaded_from_cache and output.loaded_from_cache == True %}
+                    This data was successfully loaded from the cache. 
+                    {% else %}
+                    This data was not loaded from the cache; it was freshly generated. 
+                    {% endif %}
+                    The current cache will expire on {{ output["cache_timeout"] }}.
+                </li>
+            {% elif output.file_url %}
+                <li>This data has been successfully updated and pushed to <a href="{{ output.file_url }}">Amazon S3</a> </li>
+            {% endif %}
+            
+        </ul>
+    </body>
+</html>

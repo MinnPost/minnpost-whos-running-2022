@@ -1,106 +1,109 @@
 import json
 import datetime
-from flask import current_app
+from datetime import timedelta
+import requests
+from flask import current_app, request
 from slugify import slugify
-from src.extensions import cache
 
-from sheetfu import SpreadsheetApp
-
-@cache.memoize(300)
 def parser():
     output = {}
     data = {}
+    result_json = None
+
     spreadsheet_id = current_app.config["SPREADSHEET_ID"]
+    worksheet_names = current_app.config["WORKSHEET_NAMES"]
+    cache_timeout = int(current_app.config["API_CACHE_TIMEOUT"])
+    store_in_s3 = current_app.config["STORE_IN_S3"]
+    bypass_cache = request.args.get("bypass_cache", "false")
+    if store_in_s3 == "true":
+        bypass_cache = request.args.get("bypass_cache", "true")
     if spreadsheet_id is not None:
-        races = read_spreadsheet(spreadsheet_id, "Races")
-        candidates = read_spreadsheet(spreadsheet_id, "Candidates")
+        api_key = current_app.config["API_KEY"]
+        authorize_url = current_app.config["AUTHORIZE_API_URL"]
+        url = current_app.config["PARSER_API_URL"]
+        if authorize_url != "" and api_key != "" and url != "":
+            token_params = {
+                "api_key": api_key
+            }
+            token_headers = {'Content-Type': 'application/json'}
+            token_result = requests.post(authorize_url, data=json.dumps(token_params), headers=token_headers)
+            token_json = token_result.json()
+            if token_json["token"]:
+                token = token_json["token"]
+                authorized_headers = {"Authorization": f"Bearer {token}"}
+                worksheet_slug = '|'.join(worksheet_names)
+                result = requests.get(f"{url}?spreadsheet_id={spreadsheet_id}&worksheet_names={worksheet_slug}&external_use_s3={store_in_s3}&bypass_cache={bypass_cache}", headers=authorized_headers)
+                result_json = result.json()
+    
+        if result_json is not None:
+            if "customized" in result_json:
+                output = json.dumps(result_json, default=str)
+            else:
+                races = result_json["Races"]
+                candidates = result_json["Candidates"]
 
-        if races is not None:
-            data["races"] = []
-            for race in races:
-                # format the date
-                if race["date-added"] != None:
-                    race["date-added"] = convert_xls_datetime(race["date-added"])
-                # add the office id
-                if race["office"] != None:
-                    race["office-id"] = slugify(race["office"], to_lower=True)
-                data["races"].append(race)
+                if races is not None:
+                    data["races"] = []
+                    for race in races:
+                        # add the office id
+                        if race["office"] != None:
+                            race["office-id"] = slugify(race["office"], to_lower=True)
+                        data["races"].append(race)
 
-        if candidates is not None:
-            data["candidates"] = []
-            for candidate in candidates:
-                # only load approved candidates
-                if candidate["approved"] != None:
-                    candidate["approved"] = True
-                    # make an ID
-                    candidate_id = candidate["office-sought"].replace(" ", "").lower() + "-" + candidate["name"].replace(" ", "").lower()
-                    candidate["candidate-id"] = candidate_id
-                    # add the party id
-                    if candidate["party"] != None:
-                        candidate["party-id"] = slugify(candidate["party"], to_lower=True)
-                    # add the race for this candidate
-                    race_key = [k for k, race in enumerate(data["races"]) if race["office"] == candidate["office-sought"]][0]
-                    candidate["race-id"] = slugify(data["races"][race_key]["office"], to_lower=True)
-                    # format the date fields
-                    if candidate["date-added"] != None:
-                        candidate["date-added"] = convert_xls_datetime(candidate["date-added"])
-                    if candidate["date-dropped-out"] != None:
-                        candidate["date-dropped-out"] = convert_xls_datetime(candidate["date-dropped-out"])
-                    # format the boolean fields
-                    candidate["incumbent"] = convert_xls_boolean(candidate["incumbent"])
-                    candidate["endorsed"] = convert_xls_boolean(candidate["endorsed"])
-                    candidate["dropped-out"] = convert_xls_boolean(candidate["dropped-out"])
-                    # add to the returnable data
-                    data["candidates"].append(candidate)
+                if candidates is not None:
+                    data["candidates"] = []
+                    for candidate in candidates:
+                        # only load approved candidates
+                        if candidate["approved"] != None:
+                            candidate["approved"] = True
+                            # make an ID
+                            candidate_id = candidate["office-sought"].replace(" ", "").lower() + "-" + candidate["name"].replace(" ", "").lower()
+                            candidate["candidate-id"] = candidate_id
+                            # add the party id
+                            if candidate["party"] != None:
+                                candidate["party-id"] = slugify(candidate["party"], to_lower=True)
+                            # add the race for this candidate
+                            race_key = [k for k, race in enumerate(data["races"]) if race["office"] == candidate["office-sought"]][0]
+                            candidate["race-id"] = slugify(data["races"][race_key]["office"], to_lower=True)
+                            # format the boolean fields
+                            candidate["incumbent"] = convert_xls_boolean(candidate["incumbent"])
+                            candidate["endorsed"] = convert_xls_boolean(candidate["endorsed"])
+                            candidate["dropped-out"] = convert_xls_boolean(candidate["dropped-out"])
+                            # add to the returnable data
+                            data["candidates"].append(candidate)
+                
+                # set metadata and send the customized json output to the api
+                if "generated" in result_json:
+                    data["generated"] = result_json["generated"]
+                data["customized"] = datetime.datetime.now()
+                if cache_timeout != 0:
+                    data["cache_timeout"] = data["customized"] + timedelta(seconds=int(cache_timeout))
+                else:
+                    data["cache_timeout"] = 0
+                output = json.dumps(data, default=str)
+                
+            if "customized" not in result_json or store_in_s3 == "true":
+                overwrite_url = current_app.config["OVERWRITE_API_URL"]
+                params = {
+                    "spreadsheet_id": spreadsheet_id,
+                    "worksheet_names": worksheet_names,
+                    "output": output,
+                    "cache_timeout": cache_timeout,
+                    "bypass_cache": "true",
+                    "external_use_s3": store_in_s3
+                }
 
-        output = json.dumps(data)
+                headers = {'Content-Type': 'application/json'}
+                if authorized_headers:
+                    headers = headers | authorized_headers
+                result = requests.post(overwrite_url, data=json.dumps(params), headers=headers)
+                result_json = result.json()
+                if result_json is not None:
+                    output = json.dumps(result_json, default=str)
+
     else:
         output = {} # something for empty data
     return output
-
-
-@cache.memoize(60)
-def read_spreadsheet(spreadsheet_id, worksheet_name):
-    """
-    Connect to Google spreadsheet and return the data as a list of dicts with the header values as the keys.
-    """
-    # list that will be returned
-    data = []
-    try:
-        # connect to and load the spreadsheet data
-        client = SpreadsheetApp(from_env=True)
-        spreadsheet = client.open_by_id(spreadsheet_id)
-        sheet = spreadsheet.get_sheet_by_name(worksheet_name)
-        data_range = sheet.get_data_range()
-        rows = data_range.get_values()
-
-        if rows is not None:
-            
-            # populate a list to parse
-            csv_data = []
-            for row in rows:
-                csv_data.append(row)
-            headings = []
-            for cell in csv_data[0]:
-                headings.append(cell)
-            
-            # parse each row in the list and set it up for returning
-            for row in csv_data[1:]:
-                this_row = {}
-                for i in range(0, len(row)):
-                    if row[i] == "":
-                        row[i] = None
-                    this_row[headings[i]] = row[i]
-                data.append(this_row)
-
-    except Exception as err:
-        current_app.log.error('[%s] Unable to connect to spreadsheet source: %s. The error was %s' % ('spreadsheet', spreadsheet_id, err))
-    return data
-
-
-def convert_xls_datetime(xls_date):
-    return (datetime.datetime(1899, 12, 30) + datetime.timedelta(days=xls_date)).isoformat()
-
 
 def convert_xls_boolean(string):
     if string == None:

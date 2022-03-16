@@ -2,87 +2,18 @@
 
 Tracking Minnesota candidates for the 2022 election
 
-## Google Sheets setup
+## Google Sheets to JSON API setup
 
-For both local and remote environments, you'll need to make sure the application has access to the Google Sheets data. In version 4 of the Sheets API, this happens through Service Accounts.
+For both local and remote environments, you'll need to have access to an instance of the [Google Sheets to JSON API](https://github.com/MinnPost/google-sheet-to-json-api) that itself has access to the Google Sheet(s) that you want to process. If you don't already have access to a working instance of that API, set it up and ensure it's working first.
 
-### Creating a new authentication
+### Credentials
 
-If you are authenticating with the Sheets API for the first time, you'll need to create a new Google Cloud project. Start by following [this guide from Google](https://developers.google.com/workspace/guides/create-project). When you've finished Google's steps, you should have a new project.
+To access the Google Sheets to JSON API you'll need to have two configuration values in your `.env` or in your Heroku settings.
 
-Our specific Google Sheets integration uses the [Sheetfu library](https://github.com/socialpoint-labs/sheetfu), which has [an authentication guide](https://github.com/socialpoint-labs/sheetfu/blob/master/documentation/authentication.rst) to finish this process. The screenshots are not necessarily up to date with the names Google uses for things.
-
-Between these resources, you should follow these steps to create and access the authentication credentials:
-
-1. Create a new Google Cloud Platform project.
-1. Enable the Sheets and Drive APIs in the APIs & Services section of the Google Cloud Platform settings.
-1. Create a Service Account in the IAM & Admin section of the Google Cloud Platform settings.
-1. Download the new JSON-formatted key for that Service Account. Only use this key for one environment.
-
-This new Service account will have an automatically-created email address. For this application, that email address must have at least Viewer-level access on any Google Sheets that it needs to access. It's best to give it that level of access on the folder level.
-
-If this user is new or it is being given new access, it can take a few minutes for the changes to propogate.
-
-### Accessing an existing authentication
-
-If the Service Account user already exists in the Google Cloud Platform, you can access it at https://console.cloud.google.com/home/dashboard?project=[application-name]. In MinnPost's case, this URL is [https://console.cloud.google.com/home/dashboard?project=minnpost-whos-running-2022](https://console.cloud.google.com/home/dashboard?project=minnpost-whos-running-2022).
-
-If it hasn't been, you'll need your Google account added. An Administrator can do that at the correct dashboard URL by clicking "Add People to this Project."
-
-Follow these steps to access the authentication credentials:
-
-1. Once you have access to the project's dashboard, click "Go to project settings" in the Project info box.
-1. Click Service Accounts in the IAM & Admin section of the Google Cloud Platform settings.
-1. If there is more than one service account, find the correct one.
-1. Click the Actions menu for that account and choose the Manage keys option.
-1. Click Add Key, choose Create new key, and choose JSON as the Key type. Click the Create button and download the key for that Service Account. Only use this key for one environment.
-
-Once you have downloaded the JSON file with the credentials, you will be using the values from it in the `.env` file or in the project's Heroku settings. See the sections of this readme that cover authentication for Google Sheets. Once you've authenticated successfully, you don't have to keep the JSON file around, unless you'd like to have a backup.
-
-## Redis setup
-
-Before running the application, you'll need to run a Redis server for caching data. One way to do this is with Homebrew.
-
-### Local setup
-
-1. Run `brew update` then `brew install redis`
-1. If you want Redis to start automatically on login, run `brew services start redis`. To stop it, run `brew services stop redis`. If you want to run Redis in a terminal shell instead, you can run `redis-server /usr/local/etc/redis.conf` instead of using brew service.
-1. Test if Redis is running with the command `redis-cli ping`. Redis should respond with "PONG."
-1. You shouldn't need a graphic interface for this project, but if you need one, [Medis](https://getmedis.com) is a free one on the Mac App Store.
-
-### Production setup
-
-To run Redis on Heroku, installing the free Heroku Redis add-on should be sufficient.
-
-### Configuration
-
-Use the following fields in your `.env` or in your Heroku settings.
-
-- `CACHE_TYPE = "redis"`
-- `CACHE_REDIS_HOST = "redis"`
-- `CACHE_REDIS_PORT = "6379"` (unless you are using a non-default port for Redis)
-- `CACHE_REDIS_DB = "0"` (unless you need a separate Redis database. Redis creates databases in numeric order, so you can use other numbers)
-- `CACHE_REDIS_URL = "redis://127.0.0.1:6379/0"` (make sure the `:6379` matches your port value, and that `/0` matches your Redis database number)
-- `CACHE_DEFAULT_TIMEOUT = "500"`
-
-
-## Amazon S3 setup
-
-To push JSON data from this application to Amazon AWS, we use the `boto3` library.
-
-### Configuration
-
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-
-Fill in these values from the Amazon account.
-
+- `AUTHORIZE_API_URL = "http://0.0.0.0:5000/authorize/"` (wherever the API is running, it uses an `authorize` endpoint)
+- `API_KEY = ""` (a valid API key that is accepted by the installation of the API that you're accessing)
 
 ## Application setup
-
-### Set the Google Spreadsheet to load
-
-Go to the Google spreadsheet you are using and copy the ID value from its URL. If the ID was `https://docs.google.com/spreadsheets/d/[spreadsheet-id]/edit#gid=809379382`, the ID would be `[spreadsheet-id]`. Use that value in your `.env` file and in the Heroku settings for the `SPREADSHEET_ID` field value.
 
 ### Local setup and development
 
@@ -94,45 +25,47 @@ Go to the Google spreadsheet you are using and copy the ID value from its URL. I
 1. Run `pipenv shell`
 1. Run `flask run --host=0.0.0.0`. This creates a basic endpoint server at http://0.0.0.0:5000.
 
-#### Local authentication for Google Sheets
-
-Enter the configuration values from the JSON key downloaded above into the `.env` file's values for these fields:
-
-- `SHEETFU_CONFIG_TYPE`
-- `SHEETFU_CONFIG_PROJECT_ID`
-- `SHEETFU_CONFIG_PRIVATE_KEY_ID`
-- `SHEETFU_CONFIG_PRIVATE_KEY`
-- `SHEETFU_CONFIG_CLIENT_EMAIL`
-- `SHEETFU_CONFIG_CLIENT_ID`
-- `SHEETFU_CONFIG_AUTH_URI`
-- `SHEETFU_CONFIG_TOKEN_URI`
-- `SHEETFU_CONFIG_AUTH_PROVIDER_URL`
-- `SHEETFU_CONFIG_CLIENT_CERT_URL`
-
 ### Production setup and deployment
 
-#### Code, Libraries and prerequisites
+This application can be run locally, but it can also be deployed to Heroku. If you are creating a new Heroku application, clone this repository with `git clone https://github.com/MinnPost/minnpost-whos-running-2022.git` and follow [Heroku's instructions](https://devcenter.heroku.com/articles/git#creating-a-heroku-remote) to create a Heroku remote.
 
-This application should be deployed to Heroku. If you are creating a new Heroku application, clone this repository with `git clone https://github.com/MinnPost/minnpost-whos-running-2022.git` and follow [Heroku's instructions](https://devcenter.heroku.com/articles/git#creating-a-heroku-remote) to create a Heroku remote.
+### Configuration
 
-#### Production authentication for Google Sheets
+Use the following additional fields in your `.env` or in your Heroku settings.
 
-In the project's Heroku settings, enter the configuration values from the production-only JSON key downloaded above into the values for these fields:
-
-- `SHEETFU_CONFIG_TYPE`
-- `SHEETFU_CONFIG_PROJECT_ID`
-- `SHEETFU_CONFIG_PRIVATE_KEY_ID`
-- `SHEETFU_CONFIG_PRIVATE_KEY`
-- `SHEETFU_CONFIG_CLIENT_EMAIL`
-- `SHEETFU_CONFIG_CLIENT_ID`
-- `SHEETFU_CONFIG_AUTH_URI`
-- `SHEETFU_CONFIG_TOKEN_URI`
-- `SHEETFU_CONFIG_AUTH_PROVIDER_URL`
-- `SHEETFU_CONFIG_CLIENT_CERT_URL`
+- `PARSER_API_URL = "http://0.0.0.0:5000/parser/"` (wherever the API is running, it uses a `parser` endpoint)
+- `OVERWRITE_API_URL = "http://0.0.0.0:5000/parser/custom-overwrite/"` (wherever the API is running, it uses a `parser/custom-overwrite` endpoint)
+- `SPREADSHEET_ID = "your google sheet ID"`
+- `WORKSHEET_NAMES = '["Sheet1", "Sheet2"]'` (if you want to use multiple worksheets, or only one sheet that is not the first worksheet, separate the names of the sheets with commas and surround each one with quotes. If you leave it blank, the API will use the first worksheet in the spreadsheet.)
+- `API_CACHE_TIMEOUT = "500"` (this value is how many seconds the customized cache should last. `0` means it won't expire. This value is ignored if `STORE_IN_S3` is set to "true".)
+- `STORE_IN_S3` (provide a "true" or "false" value to set whether the API should send the JSON to S3. If you leave this blank, it will follow the API's settings.)
 
 ## Application usage
 
-Currently, this application has two endpoints:
+Currently, this application has one endpoint:
 
-- `/candidate-tracker/` is a cached version of the JSON data, parsed from the Google Sheet.
-- `/candidate-tracker/push-s3` pushes the current JSON data, parsed from the Google Sheet, to Amazon S3.
+- `/candidate-tracker/` returns a basic summary of what has happened. It will show the URL of an S3 push, or the cache timeout of cached data.
+- `/candidate-tracker/json/` returns the current data parsed from the Google spreadsheet based on the configuration options above as they define caching, S3 storage, etc.
+
+### Data parameters
+
+In addition to the configuration options defined for the application, you can use `bypass_cache` with a value of `true` or `false` on the URL to set whether the application should try to load data from the API's cache. If this value is `false`, the application might load an older version of the spreadsheet. If it's `true`, it will bypass any cached data and reload it from the spreadsheet. This is the default behavior *if* S3 storage is enabled.
+
+#### Parameter examples
+
+- `0.0.0.0/candidate-tracker/?bypass_cache=true` will *always* skip data that is cached by the API and load fresh data from the spreadsheet.
+- `0.0.0.0/candidate-tracker/?bypass_cache=false` will *never* skip data that is cached by the API, but there may not be any. If there is none, it will load fresh data from the spreadsheet.
+- `0.0.0.0/candidate-tracker/` will skip cached data from the API *if* S3 storage is enabled.
+- `0.0.0.0/candidate-tracker/` will try to retrieve cached data from the API *if* S3 storage is *not* enabled.
+
+## Data update example
+
+The TL;DR for non-technical users is that they can go to `/candidate-tracker` to trigger an update of the stored data, as long as it is configured in the desired way.
+
+### More detail
+
+To use this application strictly to store data in S3 and update it manually by calling the `candidate-tracker` endpoint, run it like this:
+
+1. Set the `STORE_IN_S3` config value to "true"
+1. Load the `candidate-tracker` endpoint
+1. If successful, the endpoint will return a success message and show the URL of the updated JSON in S3.
