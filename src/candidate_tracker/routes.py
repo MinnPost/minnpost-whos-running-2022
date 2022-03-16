@@ -11,7 +11,7 @@ def index():
     return render_template('summary.html', output=output)
 
 
-@bp.route("/json", methods=['GET'])
+@bp.route("/json/", methods=['GET'])
 def index_json():
     output = spreadsheet.parser()
     mime = 'application/json'
