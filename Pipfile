@@ -7,6 +7,7 @@ name = "pypi"
 Flask = "==2.0.2"
 awesome-slugify = "==1.6.5"
 requests = "==2.27.1"
+gunicorn = "==20.1.0"
 
 [requires]
 python_version = "3.10"
