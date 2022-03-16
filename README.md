@@ -27,7 +27,7 @@ To access the Google Sheets to JSON API you'll need to have two configuration va
 
 ### Production setup and deployment
 
-This application can be run locally, but it can also be deployed to Heroku. If you are creating a new Heroku application, clone this repository with `git clone https://github.com/MinnPost/minnpost-whos-running-2022.git` and follow [Heroku's instructions](https://devcenter.heroku.com/articles/git#creating-a-heroku-remote) to create a Heroku remote.
+This application can be run locally, but it can also be deployed to Heroku. If you are creating a new Heroku application, clone this repository with `git clone https://github.com/MinnPost/minnpost-whos-running-2022.git` and follow [Heroku's instructions](https://devcenter.heroku.com/articles/git#create-a-heroku-remote) to create a Heroku remote.
 
 ### Configuration
 
